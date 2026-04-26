@@ -1,0 +1,38 @@
+From 5f6ef2ff4f15975fabf17f0fae1e651017f122e9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Rin=20Cat=20=28=E9=88=B4=E7=8C=AB=29?= <dev@rincat.ch>
+Date: Wed, 2 Mar 2022 20:13:49 -0500
+Subject: [PATCH] Linux 5.17 compat: tasklet_init
+
+---
+ core/mesh/rtw_mesh.c              | 11 +++++------
+
+diff --git a/core/mesh/rtw_mesh.c b/core/mesh/rtw_mesh.c
+index 25c17cf..fad46e8 100644
+--- a/core/mesh/rtw_mesh.c
++++ b/core/mesh/rtw_mesh.c
+@@ -2954,9 +2954,9 @@ u8 rtw_mesh_ps_annc(_adapter *adapter, u8 ps)
+ 	return annc_cnt;
+ }
+ 
+-static void mpath_tx_tasklet_hdl(void *priv)
++static void mpath_tx_tasklet_hdl(unsigned long data)
+ {
+-	_adapter *adapter = (_adapter *)priv;
++	_adapter *adapter = (_adapter *)data;
+ 	struct rtw_mesh_info *minfo = &adapter->mesh_info;
+ 	struct xmit_frame *xframe;
+ 	_list *list, *head;
+@@ -3376,10 +3376,9 @@ void rtw_mesh_init_mesh_info(_adapter *adapter)
+ 	rtw_mesh_pathtbl_init(adapter);
+ 
+ 	_rtw_init_queue(&minfo->mpath_tx_queue);
+-	tasklet_init(&minfo->mpath_tx_tasklet
+-		, (void(*)(unsigned long))mpath_tx_tasklet_hdl
+-		, (unsigned long)adapter);
+-
++	tasklet_init(&minfo->mpath_tx_tasklet,
++		mpath_tx_tasklet_hdl,
++		(unsigned long)adapter);
+ 	rtw_mrc_init(adapter);
+ 
+ 	_rtw_init_listhead(&minfo->preq_queue.list);
